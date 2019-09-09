@@ -3,11 +3,15 @@ package org.folio.circulation.resources;
 import static java.util.concurrent.CompletableFuture.completedFuture;
 import static org.folio.circulation.support.http.OkapiHeader.TENANT;
 
+import java.util.concurrent.CompletableFuture;
+import org.folio.circulation.domain.ConfigurationRepository;
 import org.folio.circulation.domain.anonymization.LoanAnonymization;
 import org.folio.circulation.domain.anonymization.LoanAnonymizationRecords;
 import org.folio.circulation.domain.anonymization.LoanAnonymizationService;
+import org.folio.circulation.domain.anonymization.config.TenantLoanAnonymizationSettings;
 import org.folio.circulation.domain.representations.anonymization.AnonymizeLoansRepresentation;
 import org.folio.circulation.support.Clients;
+import org.folio.circulation.support.Result;
 import org.folio.circulation.support.RouteRegistration;
 import org.folio.circulation.support.http.server.WebContext;
 
@@ -38,10 +42,20 @@ public class LoanAnonymizationResource extends Resource {
 
     LoanAnonymizationService loanAnonymizationService = LoanAnonymization
         .newLoanAnonymizationService(clients);
+    ConfigurationRepository configurationRepository = new ConfigurationRepository(clients);
 
-    completedFuture(new LoanAnonymizationRecords(borrowerId, tenant))
-      .thenCompose(loanAnonymizationService::anonymizeLoans)
-      .thenApply(AnonymizeLoansRepresentation::from)
-      .thenAccept(result -> result.writeTo(routingContext.response()));
+    CompletableFuture<Result<TenantLoanAnonymizationSettings>> resultCompletableFuture = configurationRepository.lookupConfigurationPeriod();
+
+
+    resultCompletableFuture.thenApply(r -> r.map(LoanAnonymizationRecords::new))
+        .thenCompose(r -> r.after(loanAnonymizationService::anonymizeLoans)
+            .thenApply(AnonymizeLoansRepresentation::from)
+            .thenAccept(result -> result.writeTo(routingContext.response())));
+
+
+//    completedFuture(new LoanAnonymizationRecords(borrowerId, tenant))
+//      .thenCompose(loanAnonymizationService::anonymizeLoans)
+//      .thenApply(AnonymizeLoansRepresentation::from)
+//      .thenAccept(result -> result.writeTo(routingContext.response()));
   }
 }

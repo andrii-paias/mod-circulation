@@ -18,13 +18,17 @@ import static org.folio.circulation.support.http.ResponseMapping.forwardOnFailur
 import static org.folio.circulation.support.http.ResponseMapping.mapUsingJson;
 import static org.folio.circulation.support.results.CommonFailures.failedDueToServerError;
 
+import com.sun.xml.internal.ws.util.CompletedFuture;
 import java.lang.invoke.MethodHandles;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
+import java.util.function.BiFunction;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import org.folio.circulation.domain.policy.LoanPolicy;
@@ -160,6 +164,41 @@ public class LoanRepository {
   private CompletableFuture<Result<Loan>> fetchUser(Result<Loan> result) {
     return result.combineAfter(userRepository::getUser, Loan::withUser);
   }
+
+
+
+//
+  public CompletableFuture<Result<MultipleRecords<Loan>>> findLoans(CqlQuery... queries) {
+
+
+//    return Arrays.stream(queries).reduce(CqlQuery::and).map(q -> loansStorageClient.getMany(q, FETCH_LOANS_LIMIT)
+//        .thenApply(result -> result.next(this::mapResponseToLoans))).get();
+
+
+
+    return Arrays.stream(queries).reduce((CqlQuery::and) ).map(q -> loansStorageClient.getMany(q, FETCH_LOANS_LIMIT)
+        .thenApply(result -> result.next(this::mapResponseToLoans))).get();
+  }
+
+
+  public CompletableFuture<Result<MultipleRecords<Loan>>> findLoansTEST(Result<CqlQuery>... queries) {
+
+    return Arrays.stream(queries).reduce((a, b) -> a.combine(b, CqlQuery::and))
+        .map(q -> q.after(q1 -> loansStorageClient.getMany(q1, FETCH_LOANS_LIMIT)
+          .thenApply(result -> result.next(this::mapResponseToLoans))))
+        .orElse(
+          CompletableFuture.completedFuture(succeeded(MultipleRecords.empty())));
+  }
+
+
+  public CompletableFuture<Result<MultipleRecords<Loan>>> findLoansTESTNOTARRAY(Result<CqlQuery> query) {
+
+    return
+        query.after(q1 -> loansStorageClient.getMany(q1, FETCH_LOANS_LIMIT)
+            .thenApply(result -> result.next(this::mapResponseToLoans)));
+
+  }
+
 
   public CompletableFuture<Result<MultipleRecords<Loan>>> findClosedLoansForUser(String userId) {
     Result<CqlQuery> query = exactMatch("userId", userId);

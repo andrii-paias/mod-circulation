@@ -1,21 +1,21 @@
-package org.folio.circulation.domain.anonymize;
+package org.folio.circulation.domain.anonymization.config;
 
 import java.util.Arrays;
 import java.util.Objects;
 
 /**
- * Enum for the configuration`s interval  representation.
+ * Enum for loan`s closing type representation.
  */
-public enum Interval {
+public enum ClosingType {
 
-  DAYS("Days"),
-  WEEKS("Weeks"),
-  MONTHS("Months"),
+  IMMEDIATELY("immediately"),
+  INTERVAL("interval"),
+  NEVER("never"),
   UNKNOWN("Unknown");
 
   private String representation;
 
-  Interval(String representation) {
+  ClosingType(String representation) {
     this.representation = representation;
   }
 
@@ -23,7 +23,7 @@ public enum Interval {
     return representation;
   }
 
-  public static Interval from(String value) {
+  public static ClosingType from(String value) {
     return Arrays.stream(values())
       .filter(v -> Objects.equals(v.getRepresentation(), (value)))
       .findFirst()

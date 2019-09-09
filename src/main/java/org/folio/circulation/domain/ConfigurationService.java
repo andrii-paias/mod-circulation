@@ -6,7 +6,7 @@ import java.lang.invoke.MethodHandles;
 import java.util.Collection;
 
 import org.apache.commons.lang3.StringUtils;
-import org.folio.circulation.domain.anonymize.LoanPeriodConfiguration;
+import org.folio.circulation.domain.anonymization.config.TenantLoanAnonymizationSettings;
 import org.joda.time.DateTimeZone;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -58,13 +58,13 @@ class ConfigurationService {
       : DEFAULT_SCHEDULED_NOTICES_PROCESSING_LIMIT;
   }
 
-  LoanPeriodConfiguration findConfigurationPeriod(Collection<Configuration> configurations) {
+  TenantLoanAnonymizationSettings findConfigurationPeriod(Collection<Configuration> configurations) {
     final String period = configurations.stream()
       .map(this::applyConfigurationPeriod)
       .findFirst()
       .orElse(DEFAULT_LOAN_PERIOD_VALUE);
 
-    return LoanPeriodConfiguration.from(new JsonObject(period));
+    return TenantLoanAnonymizationSettings.from(new JsonObject(period));
   }
 
   private String applyConfigurationPeriod(Configuration config) {

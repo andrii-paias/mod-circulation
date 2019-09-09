@@ -1,8 +1,10 @@
-package org.folio.circulation.domain.anonymize;
+package org.folio.circulation.domain.anonymization.config;
 
 /**
  * Entity for loan`s 'duration' and 'invtervalId' configurations.
  */
+
+//TODO REPLACE
 public class LoanPeriod {
 
   private int duration;

@@ -6,6 +6,8 @@ import java.util.List;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.folio.circulation.domain.Loan;
+import org.folio.circulation.domain.anonymization.config.AnonymizationConfig;
+import org.folio.circulation.domain.anonymization.config.TenantLoanAnonymizationSettings;
 
 public class LoanAnonymizationRecords {
 
@@ -14,6 +16,17 @@ public class LoanAnonymizationRecords {
   private List<String> anonymizedLoans = new ArrayList<>();
   private List<Loan> inputLoans = new ArrayList<>();
   private List<String> notAnonymizedLoans = new ArrayList<>();
+
+  private AnonymizationConfig config;
+
+  public LoanAnonymizationRecords(TenantLoanAnonymizationSettings tenantSettings) {
+
+    config = new AnonymizationConfig(tenantSettings);
+  }
+
+  public AnonymizationConfig getConfig() {
+    return config;
+  }
 
   public LoanAnonymizationRecords(String userId, String tenant) {
     this.userId = userId;
