@@ -59,8 +59,7 @@ public class AnonymizeStorageLoansRepository {
   public CompletableFuture<Result<LoanAnonymizationRecords>> postAnonymizeStorageLoans(LoanAnonymizationRecords records) {
 
     log.info("Calling POST /anonymize-storage-loans");
-    if (records.getAnonymizedLoans()
-      .isEmpty()) {
+    if (records.getAnonymizedLoans().isEmpty()) {
       return completedFuture(succeeded(records));
     }
     return loanStorageClient.post(createRequestPayload(records))
